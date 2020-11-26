@@ -26,6 +26,10 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         return userRepository.save(user)
     }
 
+    override fun getUsers(): List<User> {
+        return userRepository.findAll()
+    }
+
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
         if (attribute != null && attribute.isNotEmpty()) {
             var value = ""
