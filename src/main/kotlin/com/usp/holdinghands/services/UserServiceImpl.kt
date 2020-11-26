@@ -2,14 +2,14 @@ package com.usp.holdinghands.services
 
 import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.User
-import com.usp.holdinghands.models.UserRequest
+import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
 class UserServiceImpl(private val userRepository: UserRepository) : UserService {
 
-    override fun createUser(userRequest: UserRequest): User {
+    override fun createUser(userRequest: UserDTO): User {
         val user = User(
                 name = userRequest.name,
                 helpTypes = convertToDatabaseColumn(userRequest.helpTypes),

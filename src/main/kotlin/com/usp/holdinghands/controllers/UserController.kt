@@ -1,6 +1,6 @@
 package com.usp.holdinghands.controllers
 
-import com.usp.holdinghands.models.UserRequest
+import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.services.UserService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 class UserController(val userService: UserService) {
 
     @PostMapping("/create")
-    fun createUser(@RequestBody user: UserRequest): ResponseEntity<Any> {
+    fun createUser(@RequestBody user: UserDTO): ResponseEntity<Any> {
         return try {
             ResponseEntity(userService.createUser(user), HttpStatus.OK)
         } catch (e: DataIntegrityViolationException) {

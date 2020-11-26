@@ -55,16 +55,3 @@ class User(
         var imageId: String? = null,
         var rating: Double = 5.0
 )
-
-class UserRequest(
-        var name: String,
-        var helpTypes: List<HelpType>,
-        var gender: Gender,
-        var profession: String,
-        var birth: Date,
-        var email: String,
-        var phone: String,
-        var password: String,
-        var isHelper: Boolean,
-        var address: Address
-)

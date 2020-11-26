@@ -1,8 +1,8 @@
 package com.usp.holdinghands.services
 
 import com.usp.holdinghands.models.User
-import com.usp.holdinghands.models.UserRequest
+import com.usp.holdinghands.models.dtos.UserDTO
 
 interface UserService {
-    fun createUser(userRequest: UserRequest): User
+    fun createUser(userRequest: UserDTO): User
 }
