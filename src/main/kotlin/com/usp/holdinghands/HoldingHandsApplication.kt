@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class HoldinghandsApplication
+class HoldingHandsApplication
 
 fun main(args: Array<String>) {
-	runApplication<HoldinghandsApplication>(*args)
+	runApplication<HoldingHandsApplication>(*args)
 }
