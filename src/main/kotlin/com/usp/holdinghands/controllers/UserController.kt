@@ -4,6 +4,8 @@ import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.User
 import com.usp.holdinghands.models.UserRequest
 import com.usp.holdinghands.repositories.UserRepository
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 class UserController(val userRepository: UserRepository) {
 
     @PostMapping("/create")
-    fun createUser(@RequestBody userRequest: UserRequest): User {
+    fun createUser(@RequestBody userRequest: UserRequest): ResponseEntity<User> {
         val user = User(
                 name = userRequest.name,
                 helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
@@ -28,7 +30,7 @@ class UserController(val userRepository: UserRepository) {
                 address = userRequest.address
         )
 
-        return userRepository.save(user)
+        return ResponseEntity(userRepository.save(user), HttpStatus.OK)
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
