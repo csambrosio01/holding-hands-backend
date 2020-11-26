@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    id         SERIAL       NOT NULL,
+    user_id    SERIAL       NOT NULL,
     name       VARCHAR(255) NOT NULL,
     email      VARCHAR      NOT NULL UNIQUE,
     password   VARCHAR      NOT NULL,
@@ -12,6 +12,6 @@ CREATE TABLE users
     image_id   VARCHAR,
     rating     FLOAT        NOT NULL,
     address_id SERIAL       NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (user_id),
     FOREIGN KEY (address_id) REFERENCES addresses (address_id)
 );

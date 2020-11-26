@@ -38,7 +38,7 @@ class ListHelpTypesConverter : AttributeConverter<List<HelpType>, String?> {
 @Entity
 @Table(name = "users")
 class User(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var userId: Long? = null,
         var name: String,
 //        var age: Int,
 //        var distance: Double,
