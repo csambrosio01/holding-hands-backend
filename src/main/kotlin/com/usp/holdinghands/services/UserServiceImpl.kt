@@ -10,6 +10,7 @@ import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
@@ -49,8 +50,10 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(): List<User> {
-        return userRepository.findAll()
+    override fun getUsers(authentication: Authentication): List<User> {
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        return userRepository.findByIsHelper(!user.isHelper)
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
