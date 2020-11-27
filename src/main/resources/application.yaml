@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/holdinghands
+    username: caio
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: none
+    generate-ddl: true
+  flyway:
+    locations: classpath:db/migration
