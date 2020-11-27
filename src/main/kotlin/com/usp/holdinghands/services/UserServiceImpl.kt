@@ -20,7 +20,7 @@ class UserServiceImpl(
         private val passwordEncoder: PasswordEncoder
 ) : UserService {
 
-    override fun createUser(userRequest: UserDTO): User {
+    override fun createUser(userRequest: UserDTO): Login {
         val user = User(
                 name = userRequest.name,
                 helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
@@ -34,7 +34,8 @@ class UserServiceImpl(
                 address = userRequest.address
         )
 
-        return userRepository.save(user)
+        val token = generateJWTToken(user.email)
+        return Login(userRepository.save(user), token)
     }
 
     override fun loadUserByCredentials(login: LoginDTO): Login {
