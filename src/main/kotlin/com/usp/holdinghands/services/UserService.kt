@@ -5,4 +5,5 @@ import com.usp.holdinghands.models.dtos.UserDTO
 
 interface UserService {
     fun createUser(userRequest: UserDTO): User
+    fun getUsers(): List<User>
 }
