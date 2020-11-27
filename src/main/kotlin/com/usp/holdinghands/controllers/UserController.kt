@@ -31,7 +31,7 @@ class UserController(val userService: UserService) {
         return try {
             ResponseEntity(userService.getUsers(), HttpStatus.OK)
         } catch (e: Exception) {
-            ResponseEntity("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
+            ResponseEntity("Users not found", HttpStatus.NOT_FOUND)
         }
 
     }
