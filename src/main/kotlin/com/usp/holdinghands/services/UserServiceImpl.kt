@@ -53,11 +53,7 @@ class UserServiceImpl(
     override fun getUsers(authentication: Authentication): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        return if (user.isHelper) {
-            userRepository.findByIsHelper(false)
-        } else {
-            userRepository.findByIsHelper(true)
-        }
+        return userRepository.findByIsHelper(!user.isHelper)
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
