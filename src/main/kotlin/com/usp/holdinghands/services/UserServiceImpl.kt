@@ -1,6 +1,5 @@
 package com.usp.holdinghands.services
 
-import com.usp.holdinghands.exceptions.UserNotAuthenticatedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.HelpType
@@ -52,19 +51,13 @@ class UserServiceImpl(
     }
 
     override fun getUsers(authentication: Authentication): List<User> {
-        if(authentication.name != "anonymousUser"){
-            val username = authentication.name
-            val user = userRepository.findByEmail(username)
-            return if (user != null) {
-                if (user.isHelper) {
-                    userRepository.findByIsHelper(false)
-                } else {
-                    userRepository.findByIsHelper(true)
-                }
-            } else {
-                throw UserNotFoundException()
-            }
-        } else throw UserNotAuthenticatedException()
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        return if (user.isHelper) {
+            userRepository.findByIsHelper(false)
+        } else {
+            userRepository.findByIsHelper(true)
+        }
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {

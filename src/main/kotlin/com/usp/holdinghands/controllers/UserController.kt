@@ -1,6 +1,5 @@
 package com.usp.holdinghands.controllers
 
-import com.usp.holdinghands.exceptions.UserNotAuthenticatedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.dtos.LoginDTO
@@ -34,8 +33,6 @@ class UserController(val userService: UserService) {
             ResponseEntity(userService.getUsers(authentication), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
-        } catch (e: UserNotAuthenticatedException) {
-            ResponseEntity("User not logged in. Please login", HttpStatus.BAD_REQUEST)
         }
     }
 
