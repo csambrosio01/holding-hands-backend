@@ -1,5 +1,6 @@
 package com.usp.holdinghands.controllers
 
+import com.usp.holdinghands.exceptions.UserNotAuthenticatedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.dtos.LoginDTO
@@ -8,11 +9,8 @@ import com.usp.holdinghands.services.UserService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/user")
@@ -31,10 +29,13 @@ class UserController(val userService: UserService) {
 
     @GetMapping
     fun getUsers(): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication;
         return try {
-            ResponseEntity(userService.getUsers(), HttpStatus.OK)
-        } catch (e: Exception) {
-            ResponseEntity("Users not found", HttpStatus.NOT_FOUND)
+            ResponseEntity(userService.getUsers(authentication), HttpStatus.OK)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        } catch (e: UserNotAuthenticatedException) {
+            ResponseEntity("User not logged in. Please login", HttpStatus.BAD_REQUEST)
         }
     }
 

@@ -16,6 +16,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST,"/api/user/create").permitAll()
                 .antMatchers(HttpMethod.POST,"/api/user/login").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/user").permitAll()
                 .anyRequest().authenticated()
     }
 }

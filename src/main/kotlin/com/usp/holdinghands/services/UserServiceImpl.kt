@@ -1,5 +1,6 @@
 package com.usp.holdinghands.services
 
+import com.usp.holdinghands.exceptions.UserNotAuthenticatedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.HelpType
@@ -10,6 +11,7 @@ import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
@@ -49,8 +51,20 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(): List<User> {
-        return userRepository.findAll()
+    override fun getUsers(authentication: Authentication): List<User> {
+        if(authentication.name != "anonymousUser"){
+            val username = authentication.name
+            val user = userRepository.findByEmail(username)
+            return if (user != null) {
+                if (user.isHelper) {
+                    userRepository.findByIsHelper(false)
+                } else {
+                    userRepository.findByIsHelper(true)
+                }
+            } else {
+                throw UserNotFoundException()
+            }
+        } else throw UserNotAuthenticatedException()
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
