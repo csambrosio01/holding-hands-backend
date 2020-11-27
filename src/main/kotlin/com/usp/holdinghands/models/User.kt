@@ -1,5 +1,6 @@
 package com.usp.holdinghands.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.Date
 import javax.management.monitor.StringMonitor
 import javax.persistence.*
@@ -47,7 +48,7 @@ class User(
         var profession: String,
 //        var numberOfHelps: Int,
         @Column(unique=true) var email: String,
-        var password: String,
+        @JsonIgnore var password: String,
         @Column(unique=true) var phone: String,
         var isHelper: Boolean,
         @Temporal(TemporalType.DATE) var birth: Date,

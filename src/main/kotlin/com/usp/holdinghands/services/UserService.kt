@@ -5,4 +5,5 @@ import com.usp.holdinghands.models.UserRequest
 
 interface UserService {
     fun createUser(userRequest: UserRequest): User
+    fun getUsers(): List<User>
 }
