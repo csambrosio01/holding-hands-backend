@@ -8,12 +8,12 @@ import org.springframework.security.crypto.password.PasswordEncoder
 
 @SpringBootApplication
 class HoldingHandsApplication {
-	@Bean
-	fun encoder(): PasswordEncoder? {
-		return BCryptPasswordEncoder()
-	}
+    @Bean
+    fun encoder(): PasswordEncoder? {
+        return BCryptPasswordEncoder()
+    }
 }
 
 fun main(args: Array<String>) {
-	runApplication<HoldingHandsApplication>(*args)
+    runApplication<HoldingHandsApplication>(*args)
 }
