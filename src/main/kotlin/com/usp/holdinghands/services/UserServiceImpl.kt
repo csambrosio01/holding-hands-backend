@@ -4,10 +4,14 @@ import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.User
 import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class UserServiceImpl(private val userRepository: UserRepository) : UserService {
+class UserServiceImpl(
+        private val userRepository: UserRepository,
+        private val passwordEncoder: PasswordEncoder
+) : UserService {
 
     override fun createUser(userRequest: UserDTO): User {
         val user = User(
@@ -16,7 +20,7 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
                 gender = userRequest.gender,
                 profession = userRequest.profession,
                 email = userRequest.email,
-                password = userRequest.password,
+                password = passwordEncoder.encode(userRequest.password),
                 phone = userRequest.phone,
                 isHelper = userRequest.isHelper,
                 birth = userRequest.birth,
