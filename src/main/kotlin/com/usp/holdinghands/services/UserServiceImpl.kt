@@ -32,7 +32,8 @@ class UserServiceImpl(
                 phone = userRequest.phone,
                 isHelper = userRequest.isHelper,
                 birth = userRequest.birth,
-                address = userRequest.address
+                latitude = userRequest.latitude,
+                longitude = userRequest.longitude
         )
 
         val token = generateJWTToken(user.email)

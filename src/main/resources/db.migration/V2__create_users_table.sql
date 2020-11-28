@@ -11,6 +11,8 @@ CREATE TABLE users
     gender     VARCHAR      NOT NULL,
     image_id   VARCHAR,
     rating     FLOAT        NOT NULL,
+    latitude   DOUBLE,
+    longitude  DOUBLE,
     address_id SERIAL       NOT NULL,
     PRIMARY KEY (user_id),
     FOREIGN KEY (address_id) REFERENCES addresses (address_id)
