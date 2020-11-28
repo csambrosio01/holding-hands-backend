@@ -15,5 +15,6 @@ class UserDTO(
         var phone: String,
         var password: String,
         var isHelper: Boolean,
-        var address: Address
+        var latitude: Double,
+        var longitude: Double
 )
