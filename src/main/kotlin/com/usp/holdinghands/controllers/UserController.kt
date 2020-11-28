@@ -2,6 +2,7 @@ package com.usp.holdinghands.controllers
 
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
+import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.services.UserService
@@ -26,11 +27,11 @@ class UserController(val userService: UserService) {
         }
     }
 
-    @GetMapping
-    fun getUsers(): ResponseEntity<Any> {
+    @PostMapping
+    fun getUsers(@RequestBody coordinates: CoordinatesDTO): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication;
         return try {
-            ResponseEntity(userService.getUsers(authentication), HttpStatus.OK)
+            ResponseEntity(userService.getUsers(coordinates, authentication), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }

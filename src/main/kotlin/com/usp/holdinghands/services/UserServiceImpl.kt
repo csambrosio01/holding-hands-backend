@@ -5,6 +5,7 @@ import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.Login
 import com.usp.holdinghands.models.User
+import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
@@ -51,9 +52,12 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(authentication: Authentication): List<User> {
+    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        if (coordinates.latitude != 0.0) user.latitude = coordinates.latitude
+        if (coordinates.longitude != 0.0) user.longitude = coordinates.longitude
+        userRepository.save(user)
         return userRepository.findByIsHelper(!user.isHelper)
     }
 
