@@ -13,7 +13,5 @@ CREATE TABLE users
     rating     FLOAT        NOT NULL,
     latitude   DOUBLE,
     longitude  DOUBLE,
-    address_id SERIAL       NOT NULL,
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (address_id) REFERENCES addresses (address_id)
+    PRIMARY KEY (user_id)
 );

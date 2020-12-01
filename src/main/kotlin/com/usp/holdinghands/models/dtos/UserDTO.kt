@@ -1,6 +1,5 @@
 package com.usp.holdinghands.models.dtos
 
-import com.usp.holdinghands.models.Address
 import com.usp.holdinghands.models.Gender
 import com.usp.holdinghands.models.HelpType
 import java.util.*

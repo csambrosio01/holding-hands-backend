@@ -55,8 +55,8 @@ class UserServiceImpl(
     override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        if (coordinates.latitude != 0.0) user.latitude = coordinates.latitude
-        if (coordinates.longitude != 0.0) user.longitude = coordinates.longitude
+        user.latitude = coordinates.latitude
+        user.longitude = coordinates.longitude
         userRepository.save(user)
         return userRepository.findByIsHelper(!user.isHelper)
     }
