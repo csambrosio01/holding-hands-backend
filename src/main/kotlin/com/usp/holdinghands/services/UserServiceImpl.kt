@@ -5,6 +5,7 @@ import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.Login
 import com.usp.holdinghands.models.User
+import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.repositories.UserRepository
@@ -32,7 +33,8 @@ class UserServiceImpl(
                 phone = userRequest.phone,
                 isHelper = userRequest.isHelper,
                 birth = userRequest.birth,
-                address = userRequest.address
+                latitude = userRequest.latitude,
+                longitude = userRequest.longitude
         )
 
         val token = generateJWTToken(user.email)
@@ -50,9 +52,12 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(authentication: Authentication): List<User> {
+    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        user.latitude = coordinates.latitude
+        user.longitude = coordinates.longitude
+        userRepository.save(user)
         return userRepository.findByIsHelper(!user.isHelper)
     }
 

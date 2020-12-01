@@ -1,6 +1,5 @@
 package com.usp.holdinghands.models.dtos
 
-import com.usp.holdinghands.models.Address
 import com.usp.holdinghands.models.Gender
 import com.usp.holdinghands.models.HelpType
 import java.util.*
@@ -15,5 +14,6 @@ class UserDTO(
         var phone: String,
         var password: String,
         var isHelper: Boolean,
-        var address: Address
+        var latitude: Double,
+        var longitude: Double
 )

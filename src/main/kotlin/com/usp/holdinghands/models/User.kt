@@ -52,7 +52,8 @@ class User(
         @Column(unique=true) var phone: String,
         var isHelper: Boolean,
         @Temporal(TemporalType.DATE) var birth: Date,
-        @OneToOne(cascade = [CascadeType.ALL]) val address: Address,
+        @JsonIgnore var latitude: Double,
+        @JsonIgnore var longitude: Double,
         var imageId: String? = null,
         var rating: Double = 5.0
 )
