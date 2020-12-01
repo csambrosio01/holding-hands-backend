@@ -5,6 +5,7 @@ import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
+import com.usp.holdinghands.services.HaversineService
 import com.usp.holdinghands.services.UserService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/user")
-class UserController(val userService: UserService) {
+class UserController(val userService: UserService, val haversineService: HaversineService) {
 
     @PostMapping("/create")
     fun createUser(@RequestBody user: UserDTO): ResponseEntity<Any> {
@@ -28,10 +29,10 @@ class UserController(val userService: UserService) {
     }
 
     @PostMapping
-    fun getUsers(@RequestBody coordinates: CoordinatesDTO): ResponseEntity<Any> {
+    fun getUsers(@RequestBody coordinates: CoordinatesDTO, @RequestParam(defaultValue = "50.0") distance: Double): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication;
         return try {
-            ResponseEntity(userService.getUsers(coordinates, authentication), HttpStatus.OK)
+            ResponseEntity(userService.getUsers(coordinates, authentication, distance), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
