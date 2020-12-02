@@ -60,22 +60,12 @@ class UserServiceImpl(
         user.longitude = coordinates.longitude
         userRepository.save(user)
         val usersList = userRepository.findByIsHelper(!user.isHelper)
-        return filterUsersListByDistance(user, usersList, distance)
+        return usersList.filter{calculateUsersDistance(user, it) <= distance}
 
     }
 
     private fun calculateUsersDistance(user1: User, user2: User): Double {
         return haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
-    }
-
-    private fun filterUsersListByDistance (user: User, userList: List<User>, maxDistance: Double): List<User> {
-        val filteredList: ArrayList<User> = arrayListOf()
-        for (users in userList) {
-            if (calculateUsersDistance(user, users) <= maxDistance) {
-                filteredList.add(users)
-            }
-        }
-        return filteredList
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
