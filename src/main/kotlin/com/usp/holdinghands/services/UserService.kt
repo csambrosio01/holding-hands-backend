@@ -10,5 +10,5 @@ import org.springframework.security.core.Authentication
 interface UserService {
     fun createUser(userRequest: UserDTO): Login
     fun loadUserByCredentials(login: LoginDTO): Login
-    fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication): List<User>
+    fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication, distance: Double): List<User>
 }

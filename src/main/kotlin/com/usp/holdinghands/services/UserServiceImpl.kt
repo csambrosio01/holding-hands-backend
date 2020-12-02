@@ -18,6 +18,7 @@ import java.util.*
 
 @Service
 class UserServiceImpl(
+        private val haversineService: HaversineService,
         private val userRepository: UserRepository,
         private val passwordEncoder: PasswordEncoder
 ) : UserService {
@@ -52,13 +53,19 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication): List<User> {
+    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication, distance: Double): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.latitude = coordinates.latitude
         user.longitude = coordinates.longitude
         userRepository.save(user)
-        return userRepository.findByIsHelper(!user.isHelper)
+        val usersList = userRepository.findByIsHelper(!user.isHelper)
+        return usersList.filter{calculateUsersDistance(user, it) <= distance}
+
+    }
+
+    private fun calculateUsersDistance(user1: User, user2: User): Double {
+        return haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
