@@ -25,6 +25,8 @@ class UserServiceImpl(
     override fun createUser(userRequest: UserDTO): Login {
         val user = User(
                 name = userRequest.name,
+                distance = userRequest.distance,
+                age = userRequest.age,
                 helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
                 gender = userRequest.gender,
                 profession = userRequest.profession,
@@ -52,7 +54,7 @@ class UserServiceImpl(
     }
 
     override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication,
-                          distance: Double,
+                          maxDistance: Double,
                           gender: Gender,
                           ageMin: Int,
                           ageMax: Int,
@@ -65,14 +67,14 @@ class UserServiceImpl(
         user.longitude = coordinates.longitude
         userRepository.save(user)
         val usersList = userRepository.findByIsHelper(!user.isHelper)
-        var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= distance && (getAge(it) in ageMin..ageMax) }
+        var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
             usersListFiltered = usersListFiltered.filter{ it.gender == gender}
         }
-        if (helpTypes != null) {
-            usersListFiltered = usersListFiltered.filter{ ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes)?.any{ helpType -> helpType in helpTypes } }
+        if (helpTypes != null && helpTypes.isNotEmpty()) {
+            usersListFiltered = usersListFiltered.filter{ ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any{ helpType -> helpType in helpTypes } }
         }
-        return usersListFiltered
+        return usersListFiltered.sortedBy { it.distance }
 
     }
 
@@ -82,11 +84,15 @@ class UserServiceImpl(
         val year = user.birth.get(Calendar.YEAR)
         val month = user.birth.get(Calendar.MONTH)
         val day = user.birth.get(Calendar.DAY_OF_MONTH)
-        return Period.between(LocalDate.of(year, month, day), LocalDate.now()).years
+        user.age = Period.between(LocalDate.of(year, month, day), LocalDate.now()).years
+        //userRepository.save(user)
+        return user.age
     }
 
     private fun calculateUsersDistance(user1: User, user2: User): Double {
-        return haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
+        user2.distance = haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
+        //userRepository.save(user2)
+        return user2.distance
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {

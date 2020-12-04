@@ -5,6 +5,7 @@ import java.util.*
 import javax.management.monitor.StringMonitor
 import javax.persistence.*
 import kotlin.collections.ArrayList
+import kotlin.jvm.Transient
 
 enum class Gender {
     MALE, FEMALE, BOTH
@@ -42,8 +43,8 @@ object ListHelpTypesConverter : AttributeConverter<List<HelpType>, String?> {
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var userId: Long? = null,
         var name: String,
-//        var age: Int,
-//        var distance: Double,
+        @Transient var age: Int,
+        @Transient var distance: Double,
         var helpTypes: String?,
         @Enumerated(EnumType.STRING) var gender: Gender,
         var profession: String,

@@ -14,7 +14,7 @@ interface UserService {
     fun loadUserByCredentials(login: LoginDTO): Login
     fun getUsers(coordinates: CoordinatesDTO,
                  authentication: Authentication,
-                 distance: Double,
+                 maxDistance: Double,
                  gender: Gender,
                  ageMin: Int,
                  ageMax: Int,

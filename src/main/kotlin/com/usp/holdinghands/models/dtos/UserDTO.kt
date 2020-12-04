@@ -6,6 +6,8 @@ import java.util.*
 
 class UserDTO(
         var name: String,
+        var distance: Double,
+        var age: Int,
         var helpTypes: List<HelpType>,
         var gender: Gender,
         var profession: String,
