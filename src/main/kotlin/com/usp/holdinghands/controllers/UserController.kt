@@ -2,6 +2,9 @@ package com.usp.holdinghands.controllers
 
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
+import com.usp.holdinghands.models.Gender
+import com.usp.holdinghands.models.HelpType
+import com.usp.holdinghands.models.ListHelpTypesConverter
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
@@ -29,10 +32,18 @@ class UserController(val userService: UserService, val haversineService: Haversi
     }
 
     @PostMapping
-    fun getUsers(@RequestBody coordinates: CoordinatesDTO, @RequestParam(defaultValue = "50.0") distance: Double): ResponseEntity<Any> {
-        val authentication = SecurityContextHolder.getContext().authentication;
+    fun getUsers(@RequestBody coordinates: CoordinatesDTO,
+                 @RequestParam (defaultValue = "30.0") distance: Double,
+                 @RequestParam (defaultValue = "BOTH") gender: Gender,
+                 @RequestParam (defaultValue = "18") ageMin: Int,
+                 @RequestParam (defaultValue = "25") ageMax: Int,
+                 @RequestParam (defaultValue = "0")  helpNumberMin: Int,
+                 @RequestParam (defaultValue = "50") helpNumberMax: Int,
+                 @RequestParam (required = false ) helpTypes: String?): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val listHelpTypes = ListHelpTypesConverter.convertToEntityAttribute(helpTypes)
         return try {
-            ResponseEntity(userService.getUsers(coordinates, authentication, distance), HttpStatus.OK)
+            ResponseEntity(userService.getUsers(coordinates, authentication, distance, gender, ageMin, ageMax, helpNumberMin, helpNumberMax, listHelpTypes), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }

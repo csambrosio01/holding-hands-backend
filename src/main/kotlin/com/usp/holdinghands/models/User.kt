@@ -1,9 +1,11 @@
 package com.usp.holdinghands.models
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import java.util.Date
+import java.util.*
 import javax.management.monitor.StringMonitor
 import javax.persistence.*
+import kotlin.collections.ArrayList
+import kotlin.jvm.Transient
 
 enum class Gender {
     MALE, FEMALE, BOTH
@@ -14,7 +16,7 @@ enum class HelpType {
 }
 
 @Converter(autoApply = true)
-class ListHelpTypesConverter : AttributeConverter<List<HelpType>, String?> {
+object ListHelpTypesConverter : AttributeConverter<List<HelpType>, String?> {
     override fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
         if (attribute != null) {
             var value = ""
@@ -41,8 +43,8 @@ class ListHelpTypesConverter : AttributeConverter<List<HelpType>, String?> {
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var userId: Long? = null,
         var name: String,
-//        var age: Int,
-//        var distance: Double,
+        @Transient var age: Int,
+        @Transient var distance: Double,
         var helpTypes: String?,
         @Enumerated(EnumType.STRING) var gender: Gender,
         var profession: String,
@@ -51,7 +53,7 @@ class User(
         @JsonIgnore var password: String,
         @Column(unique=true) var phone: String,
         var isHelper: Boolean,
-        @Temporal(TemporalType.DATE) var birth: Date,
+        @Temporal(TemporalType.DATE) var birth: Calendar,
         @JsonIgnore var latitude: Double,
         @JsonIgnore var longitude: Double,
         var imageId: String? = null,
