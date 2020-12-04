@@ -25,9 +25,9 @@ class UserServiceImpl(
     override fun createUser(userRequest: UserDTO): Login {
         val user = User(
                 name = userRequest.name,
-                distance = userRequest.distance,
-                age = userRequest.age,
                 helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
+                age = 0,
+                distance = 0.0,
                 gender = userRequest.gender,
                 profession = userRequest.profession,
                 email = userRequest.email,
@@ -39,6 +39,7 @@ class UserServiceImpl(
                 longitude = userRequest.longitude
         )
         val token = generateJWTToken(user.email)
+        user.age = getAge(user)
         return Login(userRepository.save(user), token)
     }
 
@@ -61,11 +62,7 @@ class UserServiceImpl(
                           helpNumberMin: Int,
                           helpNumberMax: Int,
                           helpTypes: List<HelpType>?): List<User> {
-        val username = authentication.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        user.latitude = coordinates.latitude
-        user.longitude = coordinates.longitude
-        userRepository.save(user)
+        val user = setUserLatAndLong(authentication, coordinates)
         val usersList = userRepository.findByIsHelper(!user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
@@ -79,6 +76,15 @@ class UserServiceImpl(
     }
 
 
+
+    private fun setUserLatAndLong (auth: Authentication, coordinates: CoordinatesDTO): User {
+        val username = auth.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        user.latitude = coordinates.latitude
+        user.longitude = coordinates.longitude
+        userRepository.save(user)
+        return user
+    }
 
     private fun getAge(user: User): Int {
         val year = user.birth.get(Calendar.YEAR)
