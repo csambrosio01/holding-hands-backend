@@ -45,7 +45,7 @@ class UserServiceImpl(
 
     override fun loadUserByCredentials(login: LoginDTO): Login {
         val user = userRepository.findByEmail(login.email) ?: throw UserNotFoundException()
-
+        user.age = getAge(user)
         if (passwordEncoder.matches(login.password, user.password)) {
             val token = generateJWTToken(login.email)
             return Login(user, token)
