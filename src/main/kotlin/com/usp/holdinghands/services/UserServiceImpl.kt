@@ -85,13 +85,11 @@ class UserServiceImpl(
         val month = user.birth.get(Calendar.MONTH)
         val day = user.birth.get(Calendar.DAY_OF_MONTH)
         user.age = Period.between(LocalDate.of(year, month, day), LocalDate.now()).years
-        //userRepository.save(user)
         return user.age
     }
 
     private fun calculateUsersDistance(user1: User, user2: User): Double {
         user2.distance = haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
-        //userRepository.save(user2)
         return user2.distance
     }
 
