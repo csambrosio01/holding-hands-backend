@@ -2,9 +2,7 @@ package com.usp.holdinghands.services
 
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
-import com.usp.holdinghands.models.HelpType
-import com.usp.holdinghands.models.Login
-import com.usp.holdinghands.models.User
+import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
 import com.usp.holdinghands.models.dtos.UserDTO
@@ -14,6 +12,7 @@ import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.*
 import java.util.*
 
 @Service
@@ -37,7 +36,6 @@ class UserServiceImpl(
                 latitude = userRequest.latitude,
                 longitude = userRequest.longitude
         )
-
         val token = generateJWTToken(user.email)
         return Login(userRepository.save(user), token)
     }
@@ -53,15 +51,38 @@ class UserServiceImpl(
         }
     }
 
-    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication, distance: Double): List<User> {
+    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication,
+                          distance: Double,
+                          gender: Gender,
+                          ageMin: Int,
+                          ageMax: Int,
+                          helpNumberMin: Int,
+                          helpNumberMax: Int,
+                          helpTypes: List<HelpType>?): List<User> {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.latitude = coordinates.latitude
         user.longitude = coordinates.longitude
         userRepository.save(user)
         val usersList = userRepository.findByIsHelper(!user.isHelper)
-        return usersList.filter{calculateUsersDistance(user, it) <= distance}
+        var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= distance && (getAge(it) in ageMin..ageMax) }
+        if (gender != Gender.BOTH) {
+            usersListFiltered = usersListFiltered.filter{ it.gender == gender}
+        }
+        if (helpTypes != null) {
+            usersListFiltered = usersListFiltered.filter{ ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes)?.any{ helpType -> helpType in helpTypes } }
+        }
+        return usersListFiltered
 
+    }
+
+
+
+    private fun getAge(user: User): Int {
+        val year = user.birth.get(Calendar.YEAR)
+        val month = user.birth.get(Calendar.MONTH)
+        val day = user.birth.get(Calendar.DAY_OF_MONTH)
+        return Period.between(LocalDate.of(year, month, day), LocalDate.now()).years
     }
 
     private fun calculateUsersDistance(user1: User, user2: User): Double {

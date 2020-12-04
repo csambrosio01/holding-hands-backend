@@ -9,7 +9,7 @@ class UserDTO(
         var helpTypes: List<HelpType>,
         var gender: Gender,
         var profession: String,
-        var birth: Date,
+        var birth: Calendar,
         var email: String,
         var phone: String,
         var password: String,
