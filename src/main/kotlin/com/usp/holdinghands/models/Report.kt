@@ -5,8 +5,8 @@ import javax.persistence.*
 
 
 class ReportsPrimaryKey : Serializable {
-    private val user_reporter = 0
-    private val user_reported = 0
+    private val user_reporter: Long = 0L
+    private val user_reported: Long = 0L
 }
 @Entity
 @Table(name = "reports")
