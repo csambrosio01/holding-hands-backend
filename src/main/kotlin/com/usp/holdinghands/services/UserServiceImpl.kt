@@ -5,10 +5,13 @@ import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
+import com.usp.holdinghands.models.dtos.ReportsDTO
 import com.usp.holdinghands.models.dtos.UserDTO
+import com.usp.holdinghands.repositories.ReportsRepository
 import com.usp.holdinghands.repositories.UserRepository
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -19,7 +22,8 @@ import java.util.*
 class UserServiceImpl(
         private val haversineService: HaversineService,
         private val userRepository: UserRepository,
-        private val passwordEncoder: PasswordEncoder
+        private val passwordEncoder: PasswordEncoder,
+        private val reportsRepository: ReportsRepository
 ) : UserService {
 
     override fun createUser(userRequest: UserDTO): Login {
@@ -73,6 +77,20 @@ class UserServiceImpl(
         }
         return usersListFiltered.sortedBy { it.distance }
 
+    }
+
+    override fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports {
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val userReported = userRepository.findById(reportRequest.userReported)
+        val report = Reports(
+                userReporter = user,
+                userReported = userReported.get(),
+                message = reportRequest.message
+        )
+        if (reportsRepository.existsByUserReporterAndUserReported(report.userReporter, report.userReported)) throw DataIntegrityViolationException("Duplicate value")
+        reportsRepository.save(report)
+        return report
     }
 
 

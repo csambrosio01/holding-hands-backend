@@ -1,6 +1,7 @@
 package com.usp.holdinghands.models
 
 import java.io.Serializable
+import java.util.*
 import javax.persistence.*
 
 
@@ -11,8 +12,8 @@ class ReportsPrimaryKey : Serializable {
 @Entity
 @Table(name = "reports")
 @IdClass(ReportsPrimaryKey::class)
-class Reports (@Id @ManyToOne
+class Reports(@Id @ManyToOne
                @JoinColumn(name = "user_reporter") var userReporter: User,
-               @Id @ManyToOne
+              @Id @ManyToOne
                @JoinColumn(name = "user_reported") var userReported: User,
-               var message: String): Serializable
+              var message: String): Serializable

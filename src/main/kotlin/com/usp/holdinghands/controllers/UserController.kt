@@ -7,6 +7,7 @@ import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.ListHelpTypesConverter
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
+import com.usp.holdinghands.models.dtos.ReportsDTO
 import com.usp.holdinghands.models.dtos.UserDTO
 import com.usp.holdinghands.services.HaversineService
 import com.usp.holdinghands.services.UserService
@@ -58,6 +59,18 @@ class UserController(val userService: UserService, val haversineService: Haversi
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: WrongCredentialsException) {
             ResponseEntity("Invalid credentials", HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @PostMapping("/report")
+    fun report(@RequestBody reportRequest: ReportsDTO): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return try {
+            ResponseEntity(userService.reportUser(reportRequest, authentication), HttpStatus.OK)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        } catch (e: DataIntegrityViolationException) {
+            ResponseEntity("User already reported", HttpStatus.CONFLICT)
         }
     }
 }
