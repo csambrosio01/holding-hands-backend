@@ -1,5 +1,6 @@
 package com.usp.holdinghands.controllers
 
+import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.Gender
@@ -59,6 +60,8 @@ class UserController(val userService: UserService, val haversineService: Haversi
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: WrongCredentialsException) {
             ResponseEntity("Invalid credentials", HttpStatus.BAD_REQUEST)
+        } catch (e: UserBlockedException) {
+            ResponseEntity("Blocked User", HttpStatus.FORBIDDEN)
         }
     }
 

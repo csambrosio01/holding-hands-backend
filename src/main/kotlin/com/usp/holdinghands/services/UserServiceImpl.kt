@@ -1,5 +1,6 @@
 package com.usp.holdinghands.services
 
+import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
@@ -52,6 +53,7 @@ class UserServiceImpl(
         val user = userRepository.findByEmail(login.email) ?: throw UserNotFoundException()
         user.age = getAge(user)
         if (passwordEncoder.matches(login.password, user.password)) {
+            if (user.blocked) throw UserBlockedException()
             val token = generateJWTToken(login.email)
             return Login(user, token)
         } else {
