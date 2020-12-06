@@ -7,5 +7,5 @@ import java.util.*
 interface UserRepository : CrudRepository<User, Long> {
     fun findByEmail(email: String): User?
     override fun findAll(): List<User>
-    fun findByIsHelper(isHelper: Boolean): List<User>
+    fun findByBlockedAndIsHelper(blocked: Boolean, isHelper: Boolean): List<User>
 }

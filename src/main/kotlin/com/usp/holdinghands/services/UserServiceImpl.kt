@@ -40,7 +40,8 @@ class UserServiceImpl(
                 isHelper = userRequest.isHelper,
                 birth = userRequest.birth,
                 latitude = userRequest.latitude,
-                longitude = userRequest.longitude
+                longitude = userRequest.longitude,
+                blocked = false
         )
         val token = generateJWTToken(user.email)
         user.age = getAge(user)
@@ -67,7 +68,7 @@ class UserServiceImpl(
                           helpNumberMax: Int,
                           helpTypes: List<HelpType>?): List<User> {
         val user = setUserLatAndLong(authentication, coordinates)
-        val usersList = userRepository.findByIsHelper(!user.isHelper)
+        val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
             usersListFiltered = usersListFiltered.filter{ it.gender == gender}
@@ -82,18 +83,24 @@ class UserServiceImpl(
     override fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        val userReported = userRepository.findById(reportRequest.userReported)
+        val userReportedOptional = userRepository.findById(reportRequest.userReported)
+        val userReported = userReportedOptional.get()
         val report = Reports(
                 userReporter = user,
-                userReported = userReported.get(),
+                userReported = userReported,
                 message = reportRequest.message
         )
         if (reportsRepository.existsByUserReporterAndUserReported(report.userReporter, report.userReported)) throw DataIntegrityViolationException("Duplicate value")
         reportsRepository.save(report)
+        userReported.blocked = checkUserReportsNumber(userReported)
+        userRepository.save(userReported)
         return report
     }
 
-
+    private fun checkUserReportsNumber(user: User): Boolean {
+        val reportsNumber = reportsRepository.findByUserReported(user).size
+        return (reportsNumber >= 3)
+    }
 
     private fun setUserLatAndLong (auth: Authentication, coordinates: CoordinatesDTO): User {
         val username = auth.name

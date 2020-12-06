@@ -57,5 +57,6 @@ class User(
         @JsonIgnore var latitude: Double,
         @JsonIgnore var longitude: Double,
         var imageId: String? = null,
-        var rating: Double = 5.0
+        var rating: Double = 5.0,
+        @JsonIgnore var blocked: Boolean
 )
