@@ -43,6 +43,10 @@ class MatchServiceImpl(
         val userReceived = userService.getLoggedUser(authentication)
         checkAcceptRejectConstraints(userReceived, match)
         match.status = status
+        if (status == MatchStatus.ACCEPT) {
+            userReceived.numberOfHelps += 1
+            userRepository.save(userReceived)
+        }
         return matchRepository.save(match)
     }
 
