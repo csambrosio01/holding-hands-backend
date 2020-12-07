@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
 
 enum class MatchStatus {
-    PENDING, ACCEPTED, DONE, REJECTED
+    PENDING, ACCEPT, DONE, REJECT
 }
 
 @Entity
