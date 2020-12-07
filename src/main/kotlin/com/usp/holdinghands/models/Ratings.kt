@@ -1,5 +1,6 @@
 package com.usp.holdinghands.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
 import javax.persistence.*
 
@@ -13,7 +14,7 @@ class RatingsPrimaryKey : Serializable {
 @Table(name = "ratings")
 @IdClass(RatingsPrimaryKey::class)
 class Ratings(@Id @ManyToOne
-              @JoinColumn(name = "user_reviewer") var userReviewer: User,
+              @JsonIgnore @JoinColumn(name = "user_reviewer") var userReviewer: User,
               @Id @ManyToOne
-              @JoinColumn(name = "user_rated") var userRated: User,
+              @JsonIgnore @JoinColumn(name = "user_rated") var userRated: User,
               var rating: Double) : Serializable
