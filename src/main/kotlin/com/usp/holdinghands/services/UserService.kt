@@ -20,5 +20,5 @@ interface UserService {
                  helpNumberMin: Int,
                  helpNumberMax: Int,
                  helpTypes: List<HelpType>?): List<User>
-    fun reportUser(report: ReportsDTO, authentication: Authentication): Reports
+    fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports
 }
