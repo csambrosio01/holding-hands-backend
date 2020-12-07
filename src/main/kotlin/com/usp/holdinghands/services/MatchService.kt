@@ -7,4 +7,5 @@ import org.springframework.security.core.Authentication
 interface MatchService {
     fun sendInvite(authentication: Authentication, userIdReceived: Long): Match
     fun acceptRejectInvite(authentication: Authentication, matchId: Long, status: MatchStatus): Match
+    fun getPendingHistory(authentication: Authentication, status: MatchStatus): List<Match>
 }

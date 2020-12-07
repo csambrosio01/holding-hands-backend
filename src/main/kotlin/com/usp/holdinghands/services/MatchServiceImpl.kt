@@ -53,4 +53,19 @@ class MatchServiceImpl(
             throw DataIntegrityViolationException("Match constraint invalid")
         }
     }
+
+    override fun getPendingHistory(authentication: Authentication, status: MatchStatus): List<Match> {
+        val user = userService.getLoggedUser(authentication)
+        return if (status == MatchStatus.PENDING) {
+            matchRepository.findAllByStatusAndUserReceived((MatchStatus.PENDING), user)
+                .sortedByDescending { it.matchId }
+        } else {
+            val matchList = matchRepository.findAllByUserReceivedAndStatusIn(
+                user,
+                mutableListOf(MatchStatus.ACCEPT, MatchStatus.DONE, MatchStatus.REJECT)
+            )
+            matchList.addAll(matchRepository.findAllByUserSent(user))
+            matchList.sortedByDescending { it.matchId }
+        }
+    }
 }
