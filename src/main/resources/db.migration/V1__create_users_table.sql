@@ -13,6 +13,5 @@ CREATE TABLE users
     rating     FLOAT        NOT NULL,
     latitude   DOUBLE,
     longitude  DOUBLE,
-    blocked    BOOLEAN      NOT NULL
     PRIMARY KEY (user_id)
 );
