@@ -62,6 +62,19 @@ class UserServiceImpl(
         }
     }
 
+    override fun getLoggedUser(auth: Authentication, coordinates: CoordinatesDTO?): User {
+        val username = auth.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+
+        if (coordinates != null) {
+            user.latitude = coordinates.latitude
+            user.longitude = coordinates.longitude
+            userRepository.save(user)
+        }
+
+        return user
+    }
+
     override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication,
                           maxDistance: Double,
                           gender: Gender,
@@ -70,7 +83,7 @@ class UserServiceImpl(
                           helpNumberMin: Int,
                           helpNumberMax: Int,
                           helpTypes: List<HelpType>?): List<User> {
-        val user = setUserLatAndLong(authentication, coordinates)
+        val user = getLoggedUser(authentication, coordinates)
         val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
@@ -84,8 +97,7 @@ class UserServiceImpl(
     }
 
     override fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports {
-        val username = authentication.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val user = getLoggedUser(authentication)
         val userReportedOptional = userRepository.findById(reportRequest.userReported)
         val userReported = userReportedOptional.get()
         val report = Reports(
@@ -105,15 +117,6 @@ class UserServiceImpl(
             user.blocked = true
             userRepository.save(user)
         }
-    }
-
-    private fun setUserLatAndLong(auth: Authentication, coordinates: CoordinatesDTO): User {
-        val username = auth.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        user.latitude = coordinates.latitude
-        user.longitude = coordinates.longitude
-        userRepository.save(user)
-        return user
     }
 
     private fun getAge(user: User): Int {
