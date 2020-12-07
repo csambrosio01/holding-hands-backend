@@ -49,14 +49,14 @@ class User(
         @Enumerated(EnumType.STRING) var gender: Gender,
         var profession: String,
 //        var numberOfHelps: Int,
-        @Column(unique=true) var email: String,
+        @Column(unique = true) var email: String,
         @JsonIgnore var password: String,
-        @Column(unique=true) var phone: String,
+        @Column(unique = true) var phone: String,
         var isHelper: Boolean,
         @Temporal(TemporalType.DATE) var birth: Calendar,
         @JsonIgnore var latitude: Double,
         @JsonIgnore var longitude: Double,
         var imageId: String? = null,
         var rating: Double = 5.0,
-        @JsonIgnore var blocked: Boolean
+        @JsonIgnore var blocked: Boolean = false
 )

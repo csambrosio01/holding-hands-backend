@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.*
 import java.util.*
+import kotlin.NoSuchElementException
 
 @Service
 class UserServiceImpl(
@@ -73,10 +74,10 @@ class UserServiceImpl(
         val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
-            usersListFiltered = usersListFiltered.filter{ it.gender == gender}
+            usersListFiltered = usersListFiltered.filter { it.gender == gender }
         }
         if (helpTypes != null && helpTypes.isNotEmpty()) {
-            usersListFiltered = usersListFiltered.filter{ ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any{ helpType -> helpType in helpTypes } }
+            usersListFiltered = usersListFiltered.filter { ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any { helpType -> helpType in helpTypes } }
         }
         return usersListFiltered.sortedBy { it.distance }
 
@@ -94,17 +95,19 @@ class UserServiceImpl(
         )
         if (reportsRepository.existsByUserReporterAndUserReported(report.userReporter, report.userReported)) throw DataIntegrityViolationException("Duplicate value")
         reportsRepository.save(report)
-        userReported.blocked = checkUserReportsNumber(userReported)
-        userRepository.save(userReported)
+        checkUserReportsNumber(userReported)
         return report
     }
 
-    private fun checkUserReportsNumber(user: User): Boolean {
+    private fun checkUserReportsNumber(user: User) {
         val reportsNumber = reportsRepository.findByUserReported(user).size
-        return (reportsNumber >= 3)
+        if (reportsNumber >= 3) {
+            user.blocked = true
+            userRepository.save(user)
+        }
     }
 
-    private fun setUserLatAndLong (auth: Authentication, coordinates: CoordinatesDTO): User {
+    private fun setUserLatAndLong(auth: Authentication, coordinates: CoordinatesDTO): User {
         val username = auth.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.latitude = coordinates.latitude

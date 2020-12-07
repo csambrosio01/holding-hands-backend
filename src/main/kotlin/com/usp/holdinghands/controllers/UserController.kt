@@ -35,13 +35,13 @@ class UserController(val userService: UserService, val haversineService: Haversi
 
     @PostMapping
     fun getUsers(@RequestBody coordinates: CoordinatesDTO,
-                 @RequestParam (defaultValue = "30.0") distance: Double,
-                 @RequestParam (defaultValue = "BOTH") gender: Gender,
-                 @RequestParam (defaultValue = "18") ageMin: Int,
-                 @RequestParam (defaultValue = "25") ageMax: Int,
-                 @RequestParam (defaultValue = "0")  helpNumberMin: Int,
-                 @RequestParam (defaultValue = "50") helpNumberMax: Int,
-                 @RequestParam (required = false ) helpTypes: String?): ResponseEntity<Any> {
+                 @RequestParam(defaultValue = "30.0") distance: Double,
+                 @RequestParam(defaultValue = "BOTH") gender: Gender,
+                 @RequestParam(defaultValue = "18") ageMin: Int,
+                 @RequestParam(defaultValue = "25") ageMax: Int,
+                 @RequestParam(defaultValue = "0") helpNumberMin: Int,
+                 @RequestParam(defaultValue = "50") helpNumberMax: Int,
+                 @RequestParam(required = false) helpTypes: String?): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         val listHelpTypes = ListHelpTypesConverter.convertToEntityAttribute(helpTypes)
         return try {
@@ -74,6 +74,8 @@ class UserController(val userService: UserService, val haversineService: Haversi
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: DataIntegrityViolationException) {
             ResponseEntity("User already reported", HttpStatus.CONFLICT)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
     }
 }
