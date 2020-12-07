@@ -37,4 +37,20 @@ class MatchServiceImpl(
             throw DataIntegrityViolationException("Match constraint invalid")
         }
     }
+
+    override fun acceptRejectInvite(authentication: Authentication, matchId: Long, status: MatchStatus): Match {
+        val match = matchRepository.findById(matchId).orElseThrow()
+        val userReceived = userService.getLoggedUser(authentication)
+        checkAcceptRejectConstraints(userReceived, match)
+        match.status = status
+        return matchRepository.save(match)
+    }
+
+    private fun checkAcceptRejectConstraints(userReceived: User, match: Match) {
+        if (userReceived.userId != null && userReceived.userId == match.userReceived.userId && match.status == MatchStatus.PENDING) {
+            return
+        } else {
+            throw DataIntegrityViolationException("Match constraint invalid")
+        }
+    }
 }
