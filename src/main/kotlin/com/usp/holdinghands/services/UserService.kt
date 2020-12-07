@@ -1,11 +1,9 @@
 package com.usp.holdinghands.services
 
-import com.usp.holdinghands.models.Gender
-import com.usp.holdinghands.models.HelpType
-import com.usp.holdinghands.models.Login
-import com.usp.holdinghands.models.User
+import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
+import com.usp.holdinghands.models.dtos.ReportsDTO
 import com.usp.holdinghands.models.dtos.UserDTO
 import org.springframework.security.core.Authentication
 
@@ -21,4 +19,5 @@ interface UserService {
                  helpNumberMin: Int,
                  helpNumberMax: Int,
                  helpTypes: List<HelpType>?): List<User>
+    fun reportUser(report: ReportsDTO, authentication: Authentication): Reports
 }

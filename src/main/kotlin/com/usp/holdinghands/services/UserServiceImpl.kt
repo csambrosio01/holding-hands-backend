@@ -1,25 +1,31 @@
 package com.usp.holdinghands.services
 
+import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.CoordinatesDTO
 import com.usp.holdinghands.models.dtos.LoginDTO
+import com.usp.holdinghands.models.dtos.ReportsDTO
 import com.usp.holdinghands.models.dtos.UserDTO
+import com.usp.holdinghands.repositories.ReportsRepository
 import com.usp.holdinghands.repositories.UserRepository
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.*
 import java.util.*
+import kotlin.NoSuchElementException
 
 @Service
 class UserServiceImpl(
         private val haversineService: HaversineService,
         private val userRepository: UserRepository,
-        private val passwordEncoder: PasswordEncoder
+        private val passwordEncoder: PasswordEncoder,
+        private val reportsRepository: ReportsRepository
 ) : UserService {
 
     override fun createUser(userRequest: UserDTO): Login {
@@ -36,7 +42,8 @@ class UserServiceImpl(
                 isHelper = userRequest.isHelper,
                 birth = userRequest.birth,
                 latitude = userRequest.latitude,
-                longitude = userRequest.longitude
+                longitude = userRequest.longitude,
+                blocked = false
         )
         val token = generateJWTToken(user.email)
         user.age = getAge(user)
@@ -47,6 +54,7 @@ class UserServiceImpl(
         val user = userRepository.findByEmail(login.email) ?: throw UserNotFoundException()
         user.age = getAge(user)
         if (passwordEncoder.matches(login.password, user.password)) {
+            if (user.blocked) throw UserBlockedException()
             val token = generateJWTToken(login.email)
             return Login(user, token)
         } else {
@@ -63,21 +71,43 @@ class UserServiceImpl(
                           helpNumberMax: Int,
                           helpTypes: List<HelpType>?): List<User> {
         val user = setUserLatAndLong(authentication, coordinates)
-        val usersList = userRepository.findByIsHelper(!user.isHelper)
+        val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
-            usersListFiltered = usersListFiltered.filter{ it.gender == gender}
+            usersListFiltered = usersListFiltered.filter { it.gender == gender }
         }
         if (helpTypes != null && helpTypes.isNotEmpty()) {
-            usersListFiltered = usersListFiltered.filter{ ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any{ helpType -> helpType in helpTypes } }
+            usersListFiltered = usersListFiltered.filter { ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any { helpType -> helpType in helpTypes } }
         }
         return usersListFiltered.sortedBy { it.distance }
 
     }
 
+    override fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports {
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val userReportedOptional = userRepository.findById(reportRequest.userReported)
+        val userReported = userReportedOptional.get()
+        val report = Reports(
+                userReporter = user,
+                userReported = userReported,
+                message = reportRequest.message
+        )
+        if (reportsRepository.existsByUserReporterAndUserReported(report.userReporter, report.userReported)) throw DataIntegrityViolationException("Duplicate value")
+        reportsRepository.save(report)
+        checkUserReportsNumber(userReported)
+        return report
+    }
 
+    private fun checkUserReportsNumber(user: User) {
+        val reportsNumber = reportsRepository.findByUserReported(user).size
+        if (reportsNumber >= 3) {
+            user.blocked = true
+            userRepository.save(user)
+        }
+    }
 
-    private fun setUserLatAndLong (auth: Authentication, coordinates: CoordinatesDTO): User {
+    private fun setUserLatAndLong(auth: Authentication, coordinates: CoordinatesDTO): User {
         val username = auth.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.latitude = coordinates.latitude
