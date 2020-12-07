@@ -3,7 +3,7 @@ package com.usp.holdinghands.models
 import javax.persistence.*
 
 enum class MatchStatus {
-    PENDING, ACCEPT, DONE, REJECT
+    PENDING, ACCEPT, DONE, REJECT, HISTORY
 }
 
 @Entity
