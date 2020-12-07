@@ -35,7 +35,13 @@ class MatchController(val matchService: MatchService) {
     ): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         return try {
-            ResponseEntity(matchService.acceptRejectInvite(authentication, matchId, MatchStatus.valueOf(status.toUpperCase())), HttpStatus.OK)
+            ResponseEntity(
+                matchService.acceptRejectInvite(
+                    authentication,
+                    matchId,
+                    MatchStatus.valueOf(status.toUpperCase())
+                ), HttpStatus.OK
+            )
         } catch (e: NoSuchElementException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: UserNotFoundException) {
@@ -49,7 +55,10 @@ class MatchController(val matchService: MatchService) {
     fun getPendingHistory(@PathVariable("status") status: String): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         return try {
-            ResponseEntity(matchService.getPendingHistory(authentication, MatchStatus.valueOf(status.toUpperCase())), HttpStatus.OK)
+            ResponseEntity(
+                matchService.getPendingHistory(authentication, MatchStatus.valueOf(status.toUpperCase())),
+                HttpStatus.OK
+            )
         } catch (e: NoSuchElementException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: UserNotFoundException) {
