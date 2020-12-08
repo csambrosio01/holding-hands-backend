@@ -56,7 +56,7 @@ class User(
         @JsonIgnore var latitude: Double,
         @JsonIgnore var longitude: Double,
         var imageId: String? = null,
-        var rating: Double = 5.0,
+        var rating: Double = 0.0,
         @JsonIgnore @Column(columnDefinition = "BOOLEAN DEFAULT FALSE NOT NULL") var blocked: Boolean = false,
         @Column(name = "number_of_helps", columnDefinition = "INT DEFAULT 0 NOT NULL") var numberOfHelps: Int = 0
 )
