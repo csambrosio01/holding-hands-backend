@@ -113,6 +113,13 @@ class UserServiceImpl(
         return userRated.rating
     }
 
+    override fun changeIsHelper(authentication: Authentication): User {
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        user.isHelper = !user.isHelper
+        return userRepository.save(user)
+    }
+
     private fun checkUserReportsNumber(user: User) {
         val reportsNumber = reportsRepository.findByUserReported(user).size
         if (reportsNumber >= 3) {
