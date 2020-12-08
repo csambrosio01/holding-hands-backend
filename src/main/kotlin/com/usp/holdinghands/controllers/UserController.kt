@@ -86,7 +86,7 @@ class UserController(val userService: UserService) {
         }
     }
 
-    @PostMapping("/change")
+    @PostMapping("/update")
     fun change(): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         return try {
