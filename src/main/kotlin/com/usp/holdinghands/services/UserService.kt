@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication
 interface UserService {
     fun createUser(userRequest: UserDTO): Login
     fun loadUserByCredentials(login: LoginDTO): Login
+    fun getLoggedUser(auth: Authentication, coordinates: CoordinatesDTO? = null): User
     fun getUsers(coordinates: CoordinatesDTO,
                  authentication: Authentication,
                  maxDistance: Double,
@@ -16,6 +17,6 @@ interface UserService {
                  helpNumberMin: Int,
                  helpNumberMax: Int,
                  helpTypes: List<HelpType>?): List<User>
-    fun reportUser(report: ReportsDTO, authentication: Authentication): Reports
-    fun rateUser(rating: RatingsDTO, authentication: Authentication): Double
+    fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports
+    fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double
 }
