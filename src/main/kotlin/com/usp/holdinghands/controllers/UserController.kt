@@ -4,10 +4,8 @@ import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.Gender
-import com.usp.holdinghands.models.HelpType
 import com.usp.holdinghands.models.ListHelpTypesConverter
 import com.usp.holdinghands.models.dtos.*
-import com.usp.holdinghands.services.HaversineService
 import com.usp.holdinghands.services.UserService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/user")
-class UserController(val userService: UserService, val haversineService: HaversineService) {
+class UserController(val userService: UserService) {
 
     @PostMapping("/create")
     fun createUser(@RequestBody user: UserDTO): ResponseEntity<Any> {
@@ -86,5 +84,6 @@ class UserController(val userService: UserService, val haversineService: Haversi
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
+
     }
 }

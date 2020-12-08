@@ -101,8 +101,7 @@ class UserServiceImpl(
     override fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        val userRatingsOptional = userRepository.findById(ratingRequest.userRated)
-        val userRated = userRatingsOptional.get()
+        val userRated = userRepository.findById(ratingRequest.userRated).orElseThrow()
         val rating = Ratings (
                 userReviewer = user,
                 userRated = userRated,
