@@ -4,10 +4,8 @@ import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
-import com.usp.holdinghands.models.dtos.CoordinatesDTO
-import com.usp.holdinghands.models.dtos.LoginDTO
-import com.usp.holdinghands.models.dtos.ReportsDTO
-import com.usp.holdinghands.models.dtos.UserDTO
+import com.usp.holdinghands.models.dtos.*
+import com.usp.holdinghands.repositories.RatingsRepository
 import com.usp.holdinghands.repositories.ReportsRepository
 import com.usp.holdinghands.repositories.UserRepository
 import io.jsonwebtoken.Jwts
@@ -24,7 +22,8 @@ class UserServiceImpl(
         private val haversineService: HaversineService,
         private val userRepository: UserRepository,
         private val passwordEncoder: PasswordEncoder,
-        private val reportsRepository: ReportsRepository
+        private val reportsRepository: ReportsRepository,
+        private val ratingsRepository: RatingsRepository
 ) : UserService {
 
     override fun createUser(userRequest: UserDTO): Login {
@@ -116,6 +115,21 @@ class UserServiceImpl(
             user.blocked = true
             userRepository.save(user)
         }
+    }
+
+    override fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double {
+        val username = authentication.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val userRated = userRepository.findById(ratingRequest.userRated).orElseThrow()
+        val rating = Ratings (
+            userReviewer = user,
+            userRated = userRated,
+            rating = ratingRequest.rating
+        )
+        ratingsRepository.save(rating)
+        userRated.rating = ratingsRepository.ratingAverage(userRated.userId)
+        userRepository.save(userRated)
+        return userRated.rating
     }
 
     private fun getAge(user: User): Int {
