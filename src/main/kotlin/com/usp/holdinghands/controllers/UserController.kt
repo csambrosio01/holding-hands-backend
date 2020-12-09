@@ -84,6 +84,15 @@ class UserController(val userService: UserService) {
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
+    }
 
+    @PostMapping("/update")
+    fun update(): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return try {
+            ResponseEntity(userService.updateIsHelper(authentication), HttpStatus.OK)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        }
     }
 }
