@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.*
 import java.util.*
-import kotlin.NoSuchElementException
 
 @Service
 class UserServiceImpl(
@@ -61,6 +60,19 @@ class UserServiceImpl(
         }
     }
 
+    override fun getLoggedUser(auth: Authentication, coordinates: CoordinatesDTO?): User {
+        val username = auth.name
+        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+
+        if (coordinates != null) {
+            user.latitude = coordinates.latitude
+            user.longitude = coordinates.longitude
+            userRepository.save(user)
+        }
+
+        return user
+    }
+
     override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication,
                           maxDistance: Double,
                           gender: Gender,
@@ -69,7 +81,7 @@ class UserServiceImpl(
                           helpNumberMin: Int,
                           helpNumberMax: Int,
                           helpTypes: List<HelpType>?): List<User> {
-        val user = setUserLatAndLong(authentication, coordinates)
+        val user = getLoggedUser(authentication, coordinates)
         val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
         var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
@@ -83,8 +95,7 @@ class UserServiceImpl(
     }
 
     override fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports {
-        val username = authentication.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val user = getLoggedUser(authentication)
         val userReportedOptional = userRepository.findById(reportRequest.userReported)
         val userReported = userReportedOptional.get()
         val report = Reports(
@@ -98,14 +109,22 @@ class UserServiceImpl(
         return report
     }
 
+    private fun checkUserReportsNumber(user: User) {
+        val reportsNumber = reportsRepository.findByUserReported(user).size
+        if (reportsNumber >= 3) {
+            user.blocked = true
+            userRepository.save(user)
+        }
+    }
+
     override fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         val userRated = userRepository.findById(ratingRequest.userRated).orElseThrow()
         val rating = Ratings (
-                userReviewer = user,
-                userRated = userRated,
-                rating = ratingRequest.rating
+            userReviewer = user,
+            userRated = userRated,
+            rating = ratingRequest.rating
         )
         ratingsRepository.save(rating)
         userRated.rating = ratingsRepository.ratingAverage(userRated.userId)
@@ -113,19 +132,12 @@ class UserServiceImpl(
         return userRated.rating
     }
 
+
     override fun updateIsHelper(authentication: Authentication): User {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.isHelper = !user.isHelper
         return userRepository.save(user)
-    }
-
-    private fun checkUserReportsNumber(user: User) {
-        val reportsNumber = reportsRepository.findByUserReported(user).size
-        if (reportsNumber >= 3) {
-            user.blocked = true
-            userRepository.save(user)
-        }
     }
 
     private fun setUserLatAndLong(auth: Authentication, coordinates: CoordinatesDTO): User {
@@ -136,7 +148,7 @@ class UserServiceImpl(
         userRepository.save(user)
         return user
     }
-
+    
     private fun getAge(user: User): Int {
         val year = user.birth.get(Calendar.YEAR)
         val month = user.birth.get(Calendar.MONTH)
