@@ -113,7 +113,7 @@ class UserServiceImpl(
         return userRated.rating
     }
 
-    override fun changeIsHelper(authentication: Authentication): User {
+    override fun updateIsHelper(authentication: Authentication): User {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
         user.isHelper = !user.isHelper

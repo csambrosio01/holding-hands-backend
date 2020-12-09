@@ -18,5 +18,5 @@ interface UserService {
                  helpTypes: List<HelpType>?): List<User>
     fun reportUser(report: ReportsDTO, authentication: Authentication): Reports
     fun rateUser(rating: RatingsDTO, authentication: Authentication): Double
-    fun changeIsHelper(authentication: Authentication): User
+    fun updateIsHelper(authentication: Authentication): User
 }
