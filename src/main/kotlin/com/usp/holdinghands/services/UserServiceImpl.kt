@@ -90,6 +90,9 @@ class UserServiceImpl(
         if (helpTypes != null && helpTypes.isNotEmpty()) {
             usersListFiltered = usersListFiltered.filter { ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any { helpType -> helpType in helpTypes } }
         }
+        if (!user.isHelper) {
+            usersListFiltered = usersListFiltered.filter {it.numberOfHelps in helpNumberMin..helpNumberMax}
+        }
         return usersListFiltered.sortedBy { it.distance }
 
     }
