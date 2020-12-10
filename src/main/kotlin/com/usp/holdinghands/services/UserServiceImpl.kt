@@ -184,7 +184,7 @@ class UserServiceImpl(
     override fun getRateUser(authentication: Authentication, userId: Long): Double {
         val user = getLoggedUser(authentication)
         val userReceived = userRepository.findById(userId).orElseThrow()
-        return ratingsRepository.findByUserRatedAndUserReviewer(user, userReceived)?.rating ?: 0.0
+        return ratingsRepository.findByUserRatedAndUserReviewer(userReceived, user)?.rating ?: 0.0
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
