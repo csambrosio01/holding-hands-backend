@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/user")
@@ -93,6 +94,8 @@ class UserController(val userService: UserService) {
             ResponseEntity(userService.updateIsHelper(authentication), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        } catch (e: DataIntegrityViolationException) {
+            ResponseEntity(e.message, HttpStatus.CONFLICT)
         }
     }
 }

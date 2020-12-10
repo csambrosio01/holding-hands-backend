@@ -5,6 +5,7 @@ import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.*
+import com.usp.holdinghands.repositories.MatchRepository
 import com.usp.holdinghands.repositories.RatingsRepository
 import com.usp.holdinghands.repositories.ReportsRepository
 import com.usp.holdinghands.repositories.UserRepository
@@ -23,7 +24,8 @@ class UserServiceImpl(
         private val userRepository: UserRepository,
         private val passwordEncoder: PasswordEncoder,
         private val reportsRepository: ReportsRepository,
-        private val ratingsRepository: RatingsRepository
+        private val ratingsRepository: RatingsRepository,
+        private val matchRepository: MatchRepository
 ) : UserService {
 
     override fun createUser(userRequest: UserDTO): Login {
@@ -133,8 +135,13 @@ class UserServiceImpl(
 
     override fun updateIsHelper(authentication: Authentication): User {
         val user = getLoggedUser(authentication)
-        user.isHelper = !user.isHelper
-        return userRepository.save(user)
+
+        if (matchRepository.findAllByStatusAndUser(MatchStatus.PENDING, user).isEmpty()) {
+            user.isHelper = !user.isHelper
+            return userRepository.save(user)
+        } else {
+            throw DataIntegrityViolationException("User has pending matchs")
+        }
     }
 
     override fun getAge(user: User): Int {
