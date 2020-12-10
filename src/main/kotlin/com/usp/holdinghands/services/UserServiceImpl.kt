@@ -157,10 +157,15 @@ class UserServiceImpl(
         return user2.distance
     }
 
-    override fun getUserById(userId: Long): User {
+    override fun getUserById(authentication: Authentication, userId: Long): User {
+        val user = getLoggedUser(authentication)
         return userRepository.findById(userId).orElseThrow {
             throw UserNotFoundException()
         }
+            .apply {
+                distance = calculateUsersDistance(user, this)
+                age = getAge(this)
+            }
     }
 
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {

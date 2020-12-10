@@ -102,8 +102,9 @@ class UserController(val userService: UserService) {
 
     @GetMapping("/{user_id}")
     fun getUserById(@PathVariable("user_id") userId: Long): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
         return try {
-            ResponseEntity(userService.getUserById(userId), HttpStatus.OK)
+            ResponseEntity(userService.getUserById(authentication, userId), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
