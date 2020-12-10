@@ -23,4 +23,5 @@ interface UserService {
     fun calculateUsersDistance(user1: User, user2: User): Double
     fun getAge(user: User): Int
     fun getUserById(authentication: Authentication, userId: Long): User
+    fun getRateUser(authentication: Authentication, userId: Long): Double
 }
