@@ -157,6 +157,12 @@ class UserServiceImpl(
         return user2.distance
     }
 
+    override fun getUserById(userId: Long): User {
+        return userRepository.findById(userId).orElseThrow {
+            throw UserNotFoundException()
+        }
+    }
+
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
         if (attribute != null && attribute.isNotEmpty()) {
             var value = ""

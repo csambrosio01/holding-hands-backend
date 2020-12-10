@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.websocket.server.PathParam
 
 @RestController
 @RequestMapping("/api/user")
@@ -96,6 +97,15 @@ class UserController(val userService: UserService) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: DataIntegrityViolationException) {
             ResponseEntity(e.message, HttpStatus.CONFLICT)
+        }
+    }
+
+    @GetMapping("/{user_id}")
+    fun getUserById(@PathVariable("user_id") userId: Long): ResponseEntity<Any> {
+        return try {
+            ResponseEntity(userService.getUserById(userId), HttpStatus.OK)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
     }
 }
