@@ -109,4 +109,16 @@ class UserController(val userService: UserService) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
     }
+
+    @GetMapping("/rate/{user_id}")
+    fun getUserRate(@PathVariable("user_id") userId: Long): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return try {
+            ResponseEntity(userService.getRateUser(authentication, userId), HttpStatus.OK)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity("Rate not found", HttpStatus.NOT_FOUND)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        }
+    }
 }
