@@ -44,8 +44,15 @@ class MatchServiceImpl(
         checkAcceptRejectConstraints(userReceived, match)
         match.status = status
         if (status == MatchStatus.ACCEPT) {
-            userReceived.numberOfHelps += 1
-            userRepository.save(userReceived)
+            userRepository.save(
+                if (userReceived.isHelper) {
+                    userReceived.numberOfHelps += 1
+                    userReceived
+                } else {
+                    match.userSent.numberOfHelps += 1
+                    match.userSent
+                }
+            )
         }
         return matchRepository.save(match)
     }
