@@ -132,7 +132,6 @@ class UserServiceImpl(
         return userRated.rating
     }
 
-
     override fun updateIsHelper(authentication: Authentication): User {
         val username = authentication.name
         val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
@@ -148,8 +147,8 @@ class UserServiceImpl(
         userRepository.save(user)
         return user
     }
-    
-    private fun getAge(user: User): Int {
+
+    override fun getAge(user: User): Int {
         val year = user.birth.get(Calendar.YEAR)
         val month = user.birth.get(Calendar.MONTH)
         val day = user.birth.get(Calendar.DAY_OF_MONTH)
@@ -157,7 +156,7 @@ class UserServiceImpl(
         return user.age
     }
 
-    private fun calculateUsersDistance(user1: User, user2: User): Double {
+    override fun calculateUsersDistance(user1: User, user2: User): Double {
         user2.distance = haversineService.haversine(user1.latitude, user1.longitude, user2.latitude, user2.longitude)
         return user2.distance
     }
