@@ -20,4 +20,8 @@ interface UserService {
     fun updateIsHelper(authentication: Authentication): User
     fun reportUser(reportRequest: ReportsDTO, authentication: Authentication): Reports
     fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double
+    fun calculateUsersDistance(user1: User, user2: User): Double
+    fun getAge(user: User): Int
+    fun getUserById(authentication: Authentication, userId: Long): User
+    fun getRateUser(authentication: Authentication, userId: Long): Double
 }
