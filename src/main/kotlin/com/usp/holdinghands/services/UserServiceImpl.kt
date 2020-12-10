@@ -118,8 +118,7 @@ class UserServiceImpl(
     }
 
     override fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double {
-        val username = authentication.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val user = getLoggedUser(authentication)
         val userRated = userRepository.findById(ratingRequest.userRated).orElseThrow()
         val rating = Ratings (
             userReviewer = user,
@@ -133,19 +132,9 @@ class UserServiceImpl(
     }
 
     override fun updateIsHelper(authentication: Authentication): User {
-        val username = authentication.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
+        val user = getLoggedUser(authentication)
         user.isHelper = !user.isHelper
         return userRepository.save(user)
-    }
-
-    private fun setUserLatAndLong(auth: Authentication, coordinates: CoordinatesDTO): User {
-        val username = auth.name
-        val user = userRepository.findByEmail(username) ?: throw UserNotFoundException()
-        user.latitude = coordinates.latitude
-        user.longitude = coordinates.longitude
-        userRepository.save(user)
-        return user
     }
 
     override fun getAge(user: User): Int {
