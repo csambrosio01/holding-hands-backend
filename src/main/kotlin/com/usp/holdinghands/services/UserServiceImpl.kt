@@ -5,6 +5,7 @@ import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.*
+import com.usp.holdinghands.repositories.MatchRepository
 import com.usp.holdinghands.repositories.RatingsRepository
 import com.usp.holdinghands.repositories.ReportsRepository
 import com.usp.holdinghands.repositories.UserRepository
@@ -14,34 +15,36 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.time.*
+import java.time.LocalDate
+import java.time.Period
 import java.util.*
 
 @Service
 class UserServiceImpl(
-        private val haversineService: HaversineService,
-        private val userRepository: UserRepository,
-        private val passwordEncoder: PasswordEncoder,
-        private val reportsRepository: ReportsRepository,
-        private val ratingsRepository: RatingsRepository
+    private val haversineService: HaversineService,
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val reportsRepository: ReportsRepository,
+    private val ratingsRepository: RatingsRepository,
+    private val matchRepository: MatchRepository
 ) : UserService {
 
     override fun createUser(userRequest: UserDTO): Login {
         val user = User(
-                name = userRequest.name,
-                helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
-                age = 0,
-                distance = 0.0,
-                gender = userRequest.gender,
-                profession = userRequest.profession,
-                email = userRequest.email,
-                password = passwordEncoder.encode(userRequest.password),
-                phone = userRequest.phone,
-                isHelper = userRequest.isHelper,
-                birth = userRequest.birth,
-                latitude = userRequest.latitude,
-                longitude = userRequest.longitude,
-                blocked = false
+            name = userRequest.name,
+            helpTypes = convertToDatabaseColumn(userRequest.helpTypes),
+            age = 0,
+            distance = 0.0,
+            gender = userRequest.gender,
+            profession = userRequest.profession,
+            email = userRequest.email,
+            password = passwordEncoder.encode(userRequest.password),
+            phone = userRequest.phone,
+            isHelper = userRequest.isHelper,
+            birth = userRequest.birth,
+            latitude = userRequest.latitude,
+            longitude = userRequest.longitude,
+            blocked = false
         )
         val token = generateJWTToken(user.email)
         user.age = getAge(user)
@@ -73,22 +76,27 @@ class UserServiceImpl(
         return user
     }
 
-    override fun getUsers(coordinates: CoordinatesDTO, authentication: Authentication,
-                          maxDistance: Double,
-                          gender: Gender,
-                          ageMin: Int,
-                          ageMax: Int,
-                          helpNumberMin: Int,
-                          helpNumberMax: Int,
-                          helpTypes: List<HelpType>?): List<User> {
+    override fun getUsers(
+        coordinates: CoordinatesDTO, authentication: Authentication,
+        maxDistance: Double,
+        gender: Gender,
+        ageMin: Int,
+        ageMax: Int,
+        helpNumberMin: Int,
+        helpNumberMax: Int,
+        helpTypes: List<HelpType>?
+    ): List<User> {
         val user = getLoggedUser(authentication, coordinates)
         val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
-        var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
+        var usersListFiltered =
+            usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
         if (gender != Gender.BOTH) {
             usersListFiltered = usersListFiltered.filter { it.gender == gender }
         }
         if (helpTypes != null && helpTypes.isNotEmpty()) {
-            usersListFiltered = usersListFiltered.filter { ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any { helpType -> helpType in helpTypes } }
+            usersListFiltered = usersListFiltered.filter {
+                ListHelpTypesConverter.convertToEntityAttribute(it.helpTypes).any { helpType -> helpType in helpTypes }
+            }
         }
         return usersListFiltered.sortedBy { it.distance }
 
@@ -99,11 +107,15 @@ class UserServiceImpl(
         val userReportedOptional = userRepository.findById(reportRequest.userReported)
         val userReported = userReportedOptional.get()
         val report = Reports(
-                userReporter = user,
-                userReported = userReported,
-                message = reportRequest.message
+            userReporter = user,
+            userReported = userReported,
+            message = reportRequest.message
         )
-        if (reportsRepository.existsByUserReporterAndUserReported(report.userReporter, report.userReported)) throw DataIntegrityViolationException("Duplicate value")
+        if (reportsRepository.existsByUserReporterAndUserReported(
+                report.userReporter,
+                report.userReported
+            )
+        ) throw DataIntegrityViolationException("Duplicate value")
         reportsRepository.save(report)
         checkUserReportsNumber(userReported)
         return report
@@ -120,7 +132,7 @@ class UserServiceImpl(
     override fun rateUser(ratingRequest: RatingsDTO, authentication: Authentication): Double {
         val user = getLoggedUser(authentication)
         val userRated = userRepository.findById(ratingRequest.userRated).orElseThrow()
-        val rating = Ratings (
+        val rating = Ratings(
             userReviewer = user,
             userRated = userRated,
             rating = ratingRequest.rating
@@ -133,8 +145,13 @@ class UserServiceImpl(
 
     override fun updateIsHelper(authentication: Authentication): User {
         val user = getLoggedUser(authentication)
-        user.isHelper = !user.isHelper
-        return userRepository.save(user)
+
+        if (matchRepository.findAllByStatusAndUser(MatchStatus.PENDING, user).isEmpty()) {
+            user.isHelper = !user.isHelper
+            return userRepository.save(user)
+        } else {
+            throw DataIntegrityViolationException("User has pending matchs")
+        }
     }
 
     override fun getAge(user: User): Int {
@@ -150,6 +167,17 @@ class UserServiceImpl(
         return user2.distance
     }
 
+    override fun getUserById(authentication: Authentication, userId: Long): User {
+        val user = getLoggedUser(authentication)
+        return userRepository.findById(userId).orElseThrow {
+            throw UserNotFoundException()
+        }
+            .apply {
+                distance = calculateUsersDistance(user, this)
+                age = getAge(this)
+            }
+    }
+
     private fun convertToDatabaseColumn(attribute: List<HelpType>?): String? {
         if (attribute != null && attribute.isNotEmpty()) {
             var value = ""
@@ -163,11 +191,11 @@ class UserServiceImpl(
         val secretKey = "mySecretKey"
 
         val token = Jwts
-                .builder()
-                .setSubject(email)
-                .setIssuedAt(Date(System.currentTimeMillis()))
-                .setExpiration(null)
-                .signWith(SignatureAlgorithm.HS512, secretKey.toByteArray()).compact()
+            .builder()
+            .setSubject(email)
+            .setIssuedAt(Date(System.currentTimeMillis()))
+            .setExpiration(null)
+            .signWith(SignatureAlgorithm.HS512, secretKey.toByteArray()).compact()
 
         return "Bearer $token"
     }

@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import java.util.*
+import javax.websocket.server.PathParam
 
 @RestController
 @RequestMapping("/api/user")
@@ -91,6 +93,18 @@ class UserController(val userService: UserService) {
         val authentication = SecurityContextHolder.getContext().authentication
         return try {
             ResponseEntity(userService.updateIsHelper(authentication), HttpStatus.OK)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
+        } catch (e: DataIntegrityViolationException) {
+            ResponseEntity(e.message, HttpStatus.CONFLICT)
+        }
+    }
+
+    @GetMapping("/{user_id}")
+    fun getUserById(@PathVariable("user_id") userId: Long): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return try {
+            ResponseEntity(userService.getUserById(authentication, userId), HttpStatus.OK)
         } catch (e: UserNotFoundException) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
