@@ -88,8 +88,12 @@ class UserServiceImpl(
     ): List<User> {
         val user = getLoggedUser(authentication, coordinates)
         val usersList = userRepository.findByBlockedAndIsHelper(false, !user.isHelper)
-        var usersListFiltered =
-            usersList.filter { calculateUsersDistance(user, it) <= maxDistance && (getAge(it) in ageMin..ageMax) }
+        var usersListFiltered = usersList.filter { calculateUsersDistance(user, it) <= maxDistance }
+        usersListFiltered = if (ageMax < 80) {
+            usersListFiltered.filter { getAge(it) in ageMin..ageMax}
+        } else {
+            usersListFiltered.filter { getAge(it) >= ageMin}
+        }
         if (gender != Gender.BOTH) {
             usersListFiltered = usersListFiltered.filter { it.gender == gender }
         }
@@ -99,7 +103,11 @@ class UserServiceImpl(
             }
         }
         if (!user.isHelper) {
-            usersListFiltered = usersListFiltered.filter {it.numberOfHelps in helpNumberMin..helpNumberMax}
+            usersListFiltered = if (helpNumberMax < 100) {
+                usersListFiltered.filter { it.numberOfHelps in helpNumberMin..helpNumberMax }
+            } else {
+                usersListFiltered.filter { it.numberOfHelps >= helpNumberMin }
+            }
         }
         return usersListFiltered.sortedBy { it.distance }
 
