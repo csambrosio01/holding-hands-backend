@@ -162,8 +162,14 @@ class UserServiceImpl(
             user.isHelper = !user.isHelper
             return userRepository.save(user)
         } else {
-            throw DataIntegrityViolationException("User has pending matchs")
+            throw DataIntegrityViolationException("User has pending matches")
         }
+    }
+
+    override fun updatePhoneAvailability(authentication: Authentication): User {
+        val user = getLoggedUser(authentication)
+        user.isPhoneAvailable = !user.isPhoneAvailable
+        return userRepository.save(user)
     }
 
     override fun getAge(user: User): Int {

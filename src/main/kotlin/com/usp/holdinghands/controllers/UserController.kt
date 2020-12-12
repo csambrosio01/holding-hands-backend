@@ -88,8 +88,8 @@ class UserController(val userService: UserService) {
         }
     }
 
-    @PostMapping("/update")
-    fun update(): ResponseEntity<Any> {
+    @PostMapping("/update/ishelper")
+    fun updateIsHelper(): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         return try {
             ResponseEntity(userService.updateIsHelper(authentication), HttpStatus.OK)
@@ -97,6 +97,16 @@ class UserController(val userService: UserService) {
             ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         } catch (e: DataIntegrityViolationException) {
             ResponseEntity(e.message, HttpStatus.CONFLICT)
+        }
+    }
+
+    @PostMapping("/update/isphoneavailable")
+    fun updatePhoneAvailability(): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return try {
+            ResponseEntity(userService.updatePhoneAvailability(authentication), HttpStatus.OK)
+        } catch (e: UserNotFoundException) {
+            ResponseEntity("User not found", HttpStatus.NOT_FOUND)
         }
     }
 
