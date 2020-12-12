@@ -3,6 +3,7 @@ package com.usp.holdinghands.services
 import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
+import com.usp.holdinghands.extensions.round
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.*
 import com.usp.holdinghands.repositories.MatchRepository
@@ -149,7 +150,7 @@ class UserServiceImpl(
             rating = ratingRequest.rating
         )
         ratingsRepository.save(rating)
-        userRated.rating = ratingsRepository.ratingAverage(userRated.userId)
+        userRated.rating = ratingsRepository.ratingAverage(userRated.userId).round(2)
         userRepository.save(userRated)
         return userRated.rating
     }
