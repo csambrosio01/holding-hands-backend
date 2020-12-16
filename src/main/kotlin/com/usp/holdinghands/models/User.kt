@@ -59,5 +59,5 @@ class User(
         var rating: Double = 0.0,
         @JsonIgnore @Column(columnDefinition = "BOOLEAN DEFAULT FALSE NOT NULL") var blocked: Boolean = false,
         @Column(name = "number_of_helps", columnDefinition = "INT DEFAULT 0 NOT NULL") var numberOfHelps: Int = 0,
-        @JsonIgnore @Column(columnDefinition = "BOOLEAN DEFAULT TRUE NOT NULL") var isPhoneAvailable: Boolean = true
+        @Column(columnDefinition = "BOOLEAN DEFAULT TRUE NOT NULL") var isPhoneAvailable: Boolean = true
 )
