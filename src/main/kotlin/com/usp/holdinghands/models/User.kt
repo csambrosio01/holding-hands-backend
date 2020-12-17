@@ -58,5 +58,6 @@ class User(
         var imageId: String? = null,
         var rating: Double = 0.0,
         @JsonIgnore @Column(columnDefinition = "BOOLEAN DEFAULT FALSE NOT NULL") var blocked: Boolean = false,
-        @Column(name = "number_of_helps", columnDefinition = "INT DEFAULT 0 NOT NULL") var numberOfHelps: Int = 0
+        @Column(name = "number_of_helps", columnDefinition = "INT DEFAULT 0 NOT NULL") var numberOfHelps: Int = 0,
+        @Column(columnDefinition = "BOOLEAN DEFAULT TRUE NOT NULL") var isPhoneAvailable: Boolean = true
 )

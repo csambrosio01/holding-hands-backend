@@ -24,4 +24,5 @@ interface UserService {
     fun getAge(user: User): Int
     fun getUserById(authentication: Authentication, userId: Long): User
     fun getRateUser(authentication: Authentication, userId: Long): Double
+    fun updatePhoneAvailability(authentication: Authentication): User
 }

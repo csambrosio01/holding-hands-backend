@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN isPhoneAvailable BOOLEAN DEFAULT true NOT NULL;

@@ -3,6 +3,7 @@ package com.usp.holdinghands.services
 import com.usp.holdinghands.exceptions.UserBlockedException
 import com.usp.holdinghands.exceptions.UserNotFoundException
 import com.usp.holdinghands.exceptions.WrongCredentialsException
+import com.usp.holdinghands.extensions.round
 import com.usp.holdinghands.models.*
 import com.usp.holdinghands.models.dtos.*
 import com.usp.holdinghands.repositories.MatchRepository
@@ -149,7 +150,7 @@ class UserServiceImpl(
             rating = ratingRequest.rating
         )
         ratingsRepository.save(rating)
-        userRated.rating = ratingsRepository.ratingAverage(userRated.userId)
+        userRated.rating = ratingsRepository.ratingAverage(userRated.userId).round(2)
         userRepository.save(userRated)
         return userRated.rating
     }
@@ -161,8 +162,14 @@ class UserServiceImpl(
             user.isHelper = !user.isHelper
             return userRepository.save(user)
         } else {
-            throw DataIntegrityViolationException("User has pending matchs")
+            throw DataIntegrityViolationException("User has pending matches")
         }
+    }
+
+    override fun updatePhoneAvailability(authentication: Authentication): User {
+        val user = getLoggedUser(authentication)
+        user.isPhoneAvailable = !user.isPhoneAvailable
+        return userRepository.save(user)
     }
 
     override fun getAge(user: User): Int {
